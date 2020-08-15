@@ -17,8 +17,8 @@ Route::group(['middleware' => 'jwt.auth'], function()
 {
     Route::get('user', 'UserController@show');
 
-   //item 
-   Route::group(['prefix' => 'item'], function() {
+    //item 
+    Route::group(['prefix' => 'item'], function() {
     Route::post('/', 'ItemController@store');
     Route::get('/', 'ItemController@index');
     Route::get('show/{id}', 'ItemController@show');
