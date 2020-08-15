@@ -102,7 +102,7 @@
               </svg>
             </div>
             <img
-              :src="s3Url + image.url"
+              :src="siteUrl + path + image.url"
               class="img-thumbnail"
               @click="setFeatured(image.url , 'old' ,id)"
               :class="{'featured' : featuredImage == image.url}"
@@ -132,7 +132,6 @@ import { gsap } from "gsap";
 import TractorLoader from './TractorLoader.vue';
 import {Event} from '../../app.js';
 import { siteUrl } from "../../config";
-import { s3Url } from "../../config";
 import { api } from "../../config";
 let self = this;
 const STATUS_INITIAL = 0,
@@ -160,7 +159,6 @@ export default {
       isEdit: false,
       previousImages:[],
       siteUrl: siteUrl,
-      s3Url : s3Url,
       path: "/uploads/images/"
     };
   },
@@ -194,7 +192,7 @@ export default {
         //call delete image Api here
         let type = 'image';
 
-        axios.get(api.deleteImage + imageId + '/' + type)
+        axios.delete(api.deleteImage + imageId + '/' + type)
           .then(res => {
             this.$noty.success('Image has been deleted!');
           })
@@ -307,6 +305,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.invalid-feedback{
+  display: block !important;
+}
+
 .error-color {
   color: red;
 }
@@ -401,6 +404,7 @@ ul.image-list {
   grid-gap: 15px;
   position: relative;
   z-index: 2;
+  list-style: none;
   li {
     box-shadow: 0 0.5px 1.6px rgba(0, 0, 0, 0.04),
       0 4px 17px rgba(0, 0, 0, 0.08);

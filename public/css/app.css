@@ -10161,3 +10161,128 @@ body {
 .fade-enter, .fade-leave-active {
   opacity: 0;
 }
+
+/*=============================================
+=            Inventory Table            =
+=============================================*/
+.inventory-table .table--header {
+  border-bottom: 1px solid #707070;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  display: none;
+}
+
+.inventory-table .table--header .table-item h4 {
+  text-transform: uppercase;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.inventory-table .table--body .table-item {
+  -ms-flex-item-align: center;
+      align-self: center;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inventory-table .table--body .table-item [data-title]::before {
+  content: attr(data-title) " ";
+  display: block;
+  font-size: 11px;
+  text-decoration: underline;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.inventory-table .table--body .table-item:first-of-type {
+  grid-column: 1 / -1;
+}
+
+.inventory-table .table--body .table-item.product-tn {
+  height: 250px;
+  width: 100%;
+}
+
+.inventory-table .table--body .table-item.product-tn img {
+  -o-object-fit: cover;
+     object-fit: cover;
+  height: 100%;
+  width: 100%;
+}
+
+.inventory-table .table--body .table--row:nth-of-type(odd) {
+  background: #faf4eb;
+}
+
+.inventory-table .table--row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-gap: 20px;
+  padding: 15px;
+}
+
+.inventory-table .table--row:hover {
+  cursor: pointer;
+  background-color: #fff7d1 !important;
+}
+
+/*=====  End of Inventory Table  ======*/
+/*=============================================
+=            MODAL            =
+=============================================*/
+.modal-overlay {
+  position: fixed;
+  z-index: 9999999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(41, 33, 33, 0.83);
+  -webkit-backdrop-filter: blur(3px);
+          backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  background: #fcfaf7;
+  padding: 25px;
+  border-radius: 15px;
+  width: 85%;
+}
+
+.modal-content--header {
+  border-bottom: 1px solid #ead078;
+  margin-bottom: 25px;
+}
+
+.modal-content--header h3 {
+  font-size: 1.7rem;
+  letter-spacing: 0.5px;
+  padding-bottom: 15px;
+}
+
+.hide {
+  display: none !important;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.inventory-table .table--body .table-item.product-tn {
+  grid-column: unset;
+  height: 75px;
+  width: 100%;
+}
+
+/*=====  End of MODAL  ======*/

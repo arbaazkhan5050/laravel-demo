@@ -1,46 +1,54 @@
 <template>
-  <div class="main-content">
+  <div class="container">
     <div class="main-content--wrapper">
       <loading :active.sync="isLoading" :is-full-page="fullPage"></loading>
+
+     
       <title-bar title="New Inventory Item">
-        <template slot="button">
-          <button class="btn btn--primary" @click="saveItem">Save Item</button>
-        </template>
+     
       </title-bar>
       <div>
-       <div class="form-group">
-       		<div class="form-group">
-            <label for>Name</label>
-            <input type="text" v-model="item.name" />
+              <button class="btn btn--primary" @click="saveItem">Save Item</button>
+        	<div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" v-model="item.name" />
             <span class="form-error" v-if="$v.item.name.$error">Name is required</span>
           </div>
           <div class="form-group">
             <label for>Email</label>
-            <input type="email" v-model="item.email" />
-            <span class="form-error" v-if="$v.item.email.$error">Email is required</span>
+            <input type="email" class="form-control" v-model="item.email" />
+            <div v-if="$v.item.email.$error">
+              <span class="form-error" v-if="!$v.item.email.required">Email is required</span>
+              <span class="form-error" v-if="$v.item.email.required && !$v.item.email.email">Email is not a properly formatted email address</span>
+            </div>
           </div>
           <div class="form-group">
             <label for>Phone Number</label>
-            <input type="text" v-model="item.phone" />
-            <span class="form-error" v-if="$v.item.phone.$error">Phone Number is required</span>
+            <input type="text" @input="acceptNumber" class="form-control" v-model="item.phone" />
+            <div v-if="$v.item.phone.$error">
+              <span class="form-error" v-if="!$v.item.phone.required">Phone Number is required</span>
+              <span class="form-error" v-if="$v.item.phone.required && !$v.item.phone.phoneValid">Phone Number is not valid.</span>
+            </div>
           </div>
           <div class="form-group">
             <label for>Address</label>
-            <input type="text" v-model="item.address" />
+            <input type="text" class="form-control" v-model="item.address" />
             <span class="form-error" v-if="$v.item.address.$error">Address is required</span>
           </div>
           <div class="form-group">
             <label for>Zip Code</label>
-            <input type="number" v-model="item.zip" />
-            <span class="form-error" v-if="$v.item.zip.$error">Zip Code is required</span>
+            <input type="text" class="form-control" v-model="item.zip" />
+            <div v-if="$v.item.zip.$error">
+              <span class="form-error" v-if="!$v.item.zip.required">Zip Code is required</span>
+              <span class="form-error" v-if="!$v.item.zip.minLength">Zip Code should not be less than 5 char</span>
+              <span class="form-error" v-if="$v.item.zip.minLength && !$v.item.zip.numeric">Zip Code must be numeric</span>
+            </div>
           </div>
         </div>
-        <div class="row split-1-1">
+        <div class="form-group">
           <image-uploader></image-uploader>
         </div>
       </div>
-    </div>
-    <confirm-delete  v-if="showModal" :id="id" :hideBtn="hideBtn" :modalTitle="modalTitle" :errorModalTitle="errorModalTitle"></confirm-delete>
   </div>
 </template>
 
@@ -50,15 +58,14 @@ import ImageUploader from "./../shared/ImageUploader.vue";
 import { api } from "../../config";
 import { upload } from "../../file-upload.fake.service";
 import { Event } from "../../app.js";
-import { required } from "vuelidate/lib/validators";
+import { required, minLength, email , numeric  } from "vuelidate/lib/validators";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
-import ConfirmDelete from "./../Form/DeleteConfirmationModal.vue";
+const isPhone = (value) => /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$/.test(value);  //phone valid
 export default {
   components: {
     "title-bar": TitleBar,
     "image-uploader": ImageUploader,
-    "confirm-delete": ConfirmDelete,
     Loading
   },
   data() {
@@ -75,6 +82,10 @@ export default {
         phone: "",
         address: "",
         zip: "",
+        images: [],
+        selectedImage: "",
+        selectedImageType: "",
+        selectedImageId: ""
       },
       error: {
         images: "",
@@ -88,20 +99,29 @@ export default {
   validations: {
     item: {
       name: { required },
-      email : { required },
-      phone: { required },
+      email : { 
+        required,
+        email
+      },
+      phone: { 
+        required,
+        phoneValid:isPhone
+       },
       address: { required },
-      zip: { required },
+      zip: { 
+        required,
+        minLength: minLength(5),
+        numeric
+      },
     }
   },
   methods: {
     saveItem() {
-      
       this.$v.item.$touch();
       if (this.$v.item.$error) {
         return;
       }
-
+      
       if (this.item.selectedImage == ""  && this.item.images.length > 0) {
         this.error.selectedImage = "One featured image must be selected.";
         Event.$emit("empty-image", { error: this.error.selectedImage });
@@ -120,23 +140,23 @@ export default {
    
       form_data.append("name", this.item.name);
       form_data.append("email", this.item.email);
-      form_data.append("Phone", this.item.Phone);
+      form_data.append("phone", this.item.phone);
       form_data.append("address", this.item.address);
       form_data.append("zip", this.item.zip);
       form_data.append("primaryImage", this.item.selectedImage);
       form_data.append("primaryImageType", this.item.selectedImage);
 
       this.isLoading = true;
-      axios.post(api.storeProduct, form_data).then(res => {
+      axios.post(api.storeItem, form_data).then(res => {
         if (res.data["success"] == true) {
-          this.$noty.success("Product has been added!", {
+          this.$noty.success("Item has been added!", {
             closeWith: ["click", "button"]
           });
           this.isLoading = false;
-          this.$router.push({ name: "index" });
+          this.$router.push({ name: "form" });
         } else {
           this.$noty.error(
-            "There was an issue adding this product. Please try again..",
+            "There was an issue adding this Item. Please try again..",
             {
               closeWith: ["click", "button"]
             }
@@ -144,14 +164,15 @@ export default {
         }
       });
     },
+    acceptNumber() {
+        var x = this.item.phone.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/); 
+        this.item.phone = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    },
     setImage(images) {
       this.item.images.push(images.images);
     },
     resetImages() {
       this.item.images = [];
-    },
-    hideModal() {
-       this.showModal= false;
     }
   },
   created() {
@@ -169,44 +190,16 @@ export default {
       }
       this.item.images.splice(id.id , 1);
     });
-
-    Event.$on("open-delete-modal", data => {
-       this.showModal= true;
-       this.id = data.id;
-       this.data = data;
-       this.errorModalTitle = '';
-       this.modalTitle = "Are you sure you want to delete this " + data.label + ': ' +  data.name + ' ?';
-       this.hideBtn = true;
-    });
-
-    Event.$on("confirm-modal", status => {
-        this.deleteData(this.data);
-    });
-
-    Event.$on("cancel-modal", action => {
-        this.hideModal();
-    });
-
-  },
-  beforeDestroy(){
-     Event.$off('confirm-modal')
   }
 };
 </script>
 
 <style lang="scss" scoped>
-input[type="number"] {
-  width: 100%;
-  font-size: 1em;
-  padding: 15px 15px;
-  border-radius: 10px;
-  background: white;
-  border: 1px solid #e5e5e5;
-  box-shadow: 1px 2px 7px rgba(0, 0, 0, 0.08);
-}
+
 .form-field input {
   margin-bottom: 12px;
 }
+
 .form-error {
   font-size: 0.75rem;
   font-weight: 700;
@@ -214,22 +207,13 @@ input[type="number"] {
   display: inherit;
   padding-left: 6px;
 }
-.super-select-error {
-  margin-top: 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #cc4b37;
-  display: inherit;
-  padding-left: 6px;
-}
-.fadeIn-enter-active,
-.fadeIn-leave-active {
-  transition: opacity 0.15s;
-}
-.fadeIn-enter, .fadeIn-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
+
 .error-color {
   color: red;
+}
+.btn--primary{
+  display: block;
+  float: right;
+  margin-bottom: 10px;
 }
 </style>

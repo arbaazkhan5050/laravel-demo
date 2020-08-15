@@ -1,15 +1,14 @@
 <template>
-  <div class="main-content">
+  <div class="container">
     <div class="main-content--wrapper">
       <loading :active.sync="isLoading" :is-full-page="fullPage"></loading>
-      <title-bar title="Form List" :has-filter="true">
-        <template slot="button">
-          <router-link
+      <router-link
             :to="{ name: 'form.Add' }"
-            class="btn btn--primary"
+            class="btn btn--primary add"
             >Add</router-link
           >
-        </template>
+      <title-bar title="Form List" :has-filter="true">
+        
       </title-bar>
       <div>
         <div class="inventory-table">
@@ -46,10 +45,10 @@
               @click="editItem(item.id)"
             >
               <div class="table-item product-tn">
-                <img
+                 <p data-title="Manufacturer"> <img
                     :src="siteUrl + path + item.image"
                     onError="this.onerror=null; this.src='https://dummyimage.com/300x360/fff/aaa';"
-                  />
+                  /> </p>
               </div>
               <div class="table-item">
                 <p data-title="Manufacturer">{{ item.name }}</p>
@@ -88,6 +87,7 @@
 <script>
 import TitleBar from "./../shared/TitleBar.vue";
 import { api } from "../../config";
+import { Event } from "../../app.js";
 import { siteUrl } from "../../config";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
@@ -107,7 +107,6 @@ export default {
       path: "/uploads/images/",
       isLoading: false,
       fullPage: true,
-      url: "?include=categories,brand,model,images",
       showModal : false ,
       itemId: "",
       resultedData : '', 
@@ -116,7 +115,7 @@ export default {
   },
   methods: {
     getItems() {
-      axios.get(api.getItems + this.url).then(res => {
+      axios.get(api.getItems).then(res => {
         const results = [];
         for (let key in res.data) {
           results.push(res.data[key]);
@@ -226,14 +225,9 @@ export default {
   }
 };
 </script>
-
-<style lang="scss" scoped>
-.no-product {
-  text-align: center;
-}
-
-.table-item:before {
-  content: attr(data-title, "adfadsf");
-  display: inline-block;
+<style scoped>
+a.btn.btn--primary.add {
+  display: block;
+  float: right;
 }
 </style>

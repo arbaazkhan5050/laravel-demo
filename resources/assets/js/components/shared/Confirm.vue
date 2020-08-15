@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-content--header">
         <h4 class="modal-content--title">
-          Are you sure you want to delete this product?
+          Are you sure you want to delete this item?
         </h4>
       </div>
       <div class="modal-content--main">
@@ -43,7 +43,7 @@ export default {
     },
     deleteProduct(){
        axios.delete(api.deleteItem + this.id).then(res => {
-       this.$noty.success('Item Deleted Successfully',{
+       this.$noty.success('Item Deleted Successfully', {
               closeWith: ['click', 'button']
             });
        Event.$emit("item-deleted");

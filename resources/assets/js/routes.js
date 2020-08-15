@@ -15,7 +15,7 @@ export default [
 	},
 	{
 		path: '/form',
-		name: 'index',
+		name: 'form',
 		component: Form,
 		meta: {requiresAuth: true}
 	},

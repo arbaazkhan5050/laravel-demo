@@ -1,7 +1,7 @@
 <template>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
 		<div class="container">
-			<router-link class="navbar-brand" :to="{name: 'index'}" v-once>{{ siteName }}</router-link>
+			<router-link class="navbar-brand" :to="{name: 'profile'}" v-once>{{ siteName }}</router-link>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -14,7 +14,7 @@
 					<router-link v-show="isLoggedIn" :to="{name: 'profile'}" tag="li" class="nav-item" activeClass="active">
 						<a class="nav-link">Profile</a>
 					</router-link>
-                    <router-link v-show="isLoggedIn" :to="{name: 'list'}" tag="li" class="nav-item" activeClass="active">
+                    <router-link v-show="isLoggedIn" :to="{name: 'form'}" tag="li" class="nav-item" activeClass="active">
 						<a class="nav-link">Form List</a>
 					</router-link>
 					<li class="nav-item" v-show="isLoggedIn">

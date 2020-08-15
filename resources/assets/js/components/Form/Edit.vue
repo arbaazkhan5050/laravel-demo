@@ -1,167 +1,57 @@
 <template>
-  <div class="main-content">
+  <div class="container">
     <div class="main-content--wrapper">
       <loading :active.sync="isLoading" :is-full-page="fullPage"></loading>
-      <title-bar title="Update Inventory Item">
-        <template slot="button">
-          <button class="btn btn--primary" @click="updateItem">
+      <title-bar title="Update Inventory Item"></title-bar>
+      <div v-show="!isLoading">
+       <div>
+           <button class="btn btn--primary" @click="updateItem">
             Update Item
           </button>
-        </template>
-      </title-bar>
-      <div v-show="!isLoading">
-        <div class="row">
-          <div class="form-field">
-            <label for>Name</label>
-            <input type="text" v-model="item.name" />
-            <span class="form-error" v-if="$v.item.name.$error"
-              >Name is required</span
-            >
+        	<div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" v-model="item.name" />
+            <span class="form-error" v-if="$v.item.name.$error">Name is required</span>
           </div>
-          <div class="form-field">
-            <super-select
-              label="Category"
-              v-if="selCat"
-              :isDelete="'delete'"
-              @inputData="updateOptions"
-              :options="categories"
-              @input="selOption($event)"
-              @blur="blur"
-              @selectedOption="selectedOptions"
-              v-model="item.category"
-              :placeHolder="item.category"
-            ></super-select>
-            <span class="super-select-error" v-if="$v.item.category.$error" >Choose a Category</span>
-          </div>
-          <div class="form-field">
-            <super-select
-              label="Manufacturer"
-              v-if="selManufacturer"
-              @inputData="updateOptions"
-              :isDelete="'delete'"
-              :options="brands"
-              v-model="item.brand"
-              :placeHolder="item.brand"
-            ></super-select>
-            <span class="super-select-error" v-if="$v.item.brand.$error"
-              >Choose a Brand</span
-            >
-          </div>
-          <div class="form-field">
-            <label for>Year</label>
-            <input
-              type="number"
-              onkeypress="if(this.value.length==4) return false;"
-              v-model="item.year"
-            />
-            <span class="form-error" v-if="$v.item.year.$error"
-              >Year is required</span
-            >
-          </div>
-          <div class="form-field">
-            <label for>Stock Number</label>
-            <input type="text" v-model="item.stock_number" />
-            <span class="form-error" v-if="$v.item.stock_number.$error"
-              >Stock# is required</span
-            >
-          </div>
-          <div class="form-field">
-            <label for>Serial Number</label>
-            <input type="text" v-model="item.serial_number" />
-            <span class="form-error" v-if="$v.item.serial_number.$error"
-              >Serial# is required</span
-            >
-          </div>
-          <div class="form-field">
-            <super-select
-              label="Model"
-              v-if="selModel"
-              :isDelete="'delete'"
-              :options="models"
-              @inputData="updateOptions"
-              v-model="item.modelName"
-              :placeHolder="item.modelName"
-            ></super-select>
-            <span class="form-error" v-if="$v.item.modelName.$error"
-              >Choose a Model</span
-            >
-          </div>
-          <div class="form-field">
-            <label for>Quantity</label>
-            <input type="number" v-model="item.quantity" />
-            <span class="form-error" v-if="$v.item.quantity.$error"
-              >Quantity is required</span
-            >
-          </div>
-          <div class="row split-3-1">
-            <div class="form-field">
-              <label for>Condition</label>
-              <div class="toggler">
-                <div
-                  class="option"
-                  @click="item.condition = 'new'"
-                  :class="{ selected: item.condition == 'new' }"
-                >
-                  New
-                </div>
-                <div
-                  class="option"
-                  @click="item.condition = 'used'"
-                  :class="{ selected: item.condition == 'used' }"
-                >
-                  Used
-                </div>
-              </div>
+          <div class="form-group">
+            <label for>Email</label>
+            <input type="email" class="form-control" v-model="item.email" />
+            <div v-if="$v.item.email.$error">
+              <span class="form-error" v-if="!$v.item.email.required">Email is required</span>
+              <span class="form-error" v-if="$v.item.email.required && !$v.item.email.email">Email is not a properly formatted email address</span>
             </div>
-            <transition name="fadeIn">
-              <div class="form-field" v-show="item.condition == 'used'">
-                <label for>Hours</label>
-                <input
-                  type="text"
-                  v-model="item.hours"
-                  style="min-width:100px;"
-                />
-              </div>
-            </transition>
           </div>
-          <div class="form-field">
-            <label for>Price</label>
-            <input
-              type="number"
-              v-model="item.price"
-              v-on:blur="formatPriceIntoCurrency(item.price)"
-            />
-            <span class="form-error" v-if="$v.item.price.$error"
-              >Price is required</span
-            >
+          <div class="form-group">
+            <label for>Phone Number</label>
+            <input type="text" @input="acceptNumber" class="form-control" v-model="item.phone" />
+            <div v-if="$v.item.phone.$error">
+              <span class="form-error" v-if="!$v.item.phone.required">Phone Number is required</span>
+              <span class="form-error" v-if="$v.item.phone.required && !$v.item.phone.phoneValid">Phone Number is not valid.</span>
+            </div>
           </div>
-          <div class="form-field">
-            <super-select
-              v-if="item.category"
-              label="Location"
-              :isFilter="'filter'"
-              :options="locations"
-              v-model="item.location"
-              :placeHolder="item.location"
-            ></super-select>
-          </div> 
-        </div>
-        <div class="row full-width">
-          <div class="form-field">
-            <label for>Description</label>
-            <textarea cols="30" rows="10" v-model="item.description"></textarea>
+          <div class="form-group">
+            <label for>Address</label>
+            <input type="text" class="form-control" v-model="item.address" />
+            <span class="form-error" v-if="$v.item.address.$error">Address is required</span>
+          </div>
+          <div class="form-group">
+            <label for>Zip Code</label>
+            <input type="text" class="form-control" v-model="item.zip" />
+            <div v-if="$v.item.zip.$error">
+              <span class="form-error" v-if="!$v.item.zip.required">Zip Code is required</span>
+              <span class="form-error" v-if="!$v.item.zip.minLength">Zip Code should not be less than 5 char</span>
+              <span class="form-error" v-if="$v.item.zip.minLength && !$v.item.zip.numeric">Zip Code must be numeric</span>
+            </div>
           </div>
         </div>
-        <div class="row split-1-1">
+        <div class="form-group">
           <image-uploader></image-uploader>
-          <file-uploader></file-uploader>
         </div>
         <div class="row full-width time-stamp">
           <p class="time">This item was added on {{ item.created_at }}.</p>
         </div>
       </div>
     </div>
-    <confirm-delete  v-if="showModal" :id="id" :hideBtn="hideBtn" :modalTitle="modalTitle" :errorModalTitle="errorModalTitle"></confirm-delete>
   </div>
 </template>
 
@@ -171,15 +61,16 @@ import ImageUploader from "./../shared/ImageUploader.vue";
 import { api } from "../../config";
 import { upload } from "../../file-upload.fake.service";
 import { Event } from "../../app.js";
-import { required } from "vuelidate/lib/validators";
+import { required, minLength, email , numeric  } from "vuelidate/lib/validators";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
-import ConfirmDelete from "./../Form/DeleteConfirmationModal.vue";
+
+const isPhone = (value) => /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$/.test(value);  //phone valid
+
 export default {
   components: {
     "title-bar": TitleBar,
     "image-uploader": ImageUploader,
-    "confirm-delete": ConfirmDelete,
     Loading
   },
   data() {
@@ -190,116 +81,24 @@ export default {
       modalTitle : "",
       hideBtn : "",
       errorModalTitle : "",
-      selCat : "",
-      selManufacturer : "",
-      selModel : "",
       item: {
         id: "",
         name: "",
-        category: "",
-        category_id: "",
-        brand_id: "",
-        brand: "",
-        year: "",
-        modelName: "",
-        model_id: "",
-        serial_number: "",
-        stock_number: "",
-        condition: "new",
-        hours: "",
-        price: "",
-        description: "",
-        quantity: "",
+        email: "",
+        phone: "",
+        address: "",
+        zip: "",
         images: [],
-        documents: [],
         selectedImage: "",
         selectedImageType: "old",
         selectedImageId: "",
         created_at: "",
-        location : ""
       },
       error: {
         selectedImage: ""
       },
-      categories: [],
-      brands: [],
-      models: [],
-      locations : [
-      {
-        'id' : 1,
-        'name' : 'Abilene, TX',
-      },
-      {
-        'id' : 2,
-        'name' : 'Amarillo, TX',
-      },
-      {
-        'id' : 3,
-        'name' : 'Beaumont, TX',
-      },
-      {
-        'id' : 4,
-        'name' : 'Belton, TX',
-      },
-      {
-        'id' : 5,
-        'name' : 'Brenham, TX',
-      },
-      {
-        'id' : 6,
-        'name' : 'Clovis, NM',
-      },
-      {
-        'id' : 8,
-        'name' : 'Euless, TX',
-      },
-      {
-        'id' : 9,
-        'name' : 'Houston, TX',
-      },
-      {
-        'id' : 10,
-        'name' : 'Manor / Austin, TX',
-      },
-      {
-        'id' : 11,
-        'name' : 'Midland, TX',
-      },
-      {
-        'id' : 11,
-        'name' : 'Odessa, TX',
-      },
-      {
-        'id' : 12,
-        'name' : 'Perryton, TX',
-      },
-      {
-        'id' : 13,
-        'name' : 'San Angelo, TX',
-      },
-      {
-        'id' : 14,
-        'name' : 'San Antonio, TX',
-      },
-      {
-        'id' : 15,
-        'name' : 'Sherman, TX',
-      },
-      {
-        'id' : 16,
-        'name' : 'Terrell, TX',
-      },
-      {
-        'id' : 17,
-        'name' : 'Tyler, TX',
-      },
-      {
-        'id' : 18,
-        'name' : 'Wichita Falls, TX',
-      }
-      ],
       isDisabled: false,
-      productId: "",
+      itemId: "",
       isLoading: false,
       fullPage: true
     };
@@ -307,139 +106,40 @@ export default {
   validations: {
     item: {
       name: { required },
-      category: { required },
-      brand: { required },
-      year: { required },
-      modelName: { required },
-      serial_number: { required },
-      stock_number: { required },
-      price: { required },
-      quantity: { required }
+      email : { 
+        required,
+        email
+      },
+      phone: { 
+        required,
+        phoneValid:isPhone
+       },
+      address: { required },
+      zip: { 
+        required,
+        minLength: minLength(5),
+        numeric
+      },
     }
   },
   methods: {
-     hideModal() {
-       this.showModal= false;
+    acceptNumber() {
+        var x = this.item.phone.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/); 
+        this.item.phone = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
     },
-    deleteData(Arr){
-      this.isLoading = true;
-      let url = '';
-      let label = Arr.label;
-      switch (label) {
-        case "Manufacturer":
-          url = api.storeManufacturers + "/" + Arr.id;
-          break;
-        case "Category":
-             url = api.storeCategory + "/" + Arr.id;
-          break;
-        case "Model":
-           url = api.storeModel + "/" + Arr.id;
-           break;
-      }
-      axios.delete(url).then(res => {
-        if(res.data.result.error){
-            this.isLoading = false;
-            this.modalTitle = '';
-            this.hideBtn = false;
-            this.errorModalTitle = res.data.result.error;
-        } else {
-            this.isLoading = false;
-            this.$noty.success("Record deleted Successfully!");
-            this.hideModal();  
-            this.getDropMenu(label);
-        }
-    });
-    },
-    getDropMenu(title){
-
-    switch (title) {
-        case "Manufacturer":
-          this.getBrand();
-          break;
-        case "Category":
-          this.getCategory();
-          break;
-        case "Model":
-          this.getModel();
-          break;
-      }
-    },
-    selectedOptions(data) {
-      if (data.label === "Category") {
-        if (data.val) {
-          this.isDisabled = false;
-        }
-      }
-    },
-    blur(data) {
-      if (data.label === "Category") {
-        if (data.val === null) {
-          this.isDisabled = true;
-        }
-      }
-    },
-    selOption() {},
-    updateOptions(Arr) {
-      let length = Arr.options.length - 1;
-      let options = { id: length, name: Arr.options[length].name };
-      let urls = "";
-      switch (Arr.label) {
-        case "Manufacturer":
-          axios.post(api.storeManufacturers, options).then(res => {
-              this.getBrand();
-            this.item.brand_id = res.data.id;
-          });
-          break;
-        case "Category":
-          axios.post(api.storeCategory, options).then(res => {
-              this.getCategory();
-          });
-          this.isDisabled = false;
-          break;
-        case "Model":
-          axios.post(api.storeModel, options).then(res => {
-              this.getModel();
-          });
-          break;
-      }
-    },
-    getProduct() {
+    getItem() {
       this.isLoading = true;
       setTimeout(() => {
         this.isLoading = false;
       }, 3500);
 
-      axios.get(api.getProduct + this.productId).then(res => {
+      axios.get(api.getItem + this.itemId).then(res => {
         this.item.id = res.data.id;
         this.item.name = res.data.name;
-        this.item.description = res.data.description;
-        this.item.serial_number = res.data.serial_number;
-        this.item.stock_number = res.data.stock_number;
-        this.item.year = res.data.year;
-        this.item.quantity = res.data.quantity;
-        this.item.category_id = res.data.category_id;
-        this.item.brand_id = res.data.brand_id;
-        this.item.model_id = res.data.model_id;
-        this.item.price = res.data.price;
-        this.item.condition = res.data.condition;
-        this.item.location = res.data.location;
-        
-        if (res.data.hours != null) {
-          this.item.hours = res.data.hours;
-        }
-
-
-
-
-      this.selCat = res.data.categories.name;
-      this.selManufacturer = res.data.brand.name;
-      this.selModel = res.data.brand.name;
-
-
-
-        this.item.category = res.data.categories.name;
-        this.item.brand = res.data.brand.name;
-        this.item.modelName = res.data.model.name;
+        this.item.email = res.data.email;
+        this.item.phone = res.data.phone;
+        this.item.address = res.data.address;
+        this.item.zip = res.data.zip;
         this.item.created_at = res.data.created_at;
 
         for (let key in res.data.images) {
@@ -448,17 +148,9 @@ export default {
             this.item.selectedImage = res.data.images[key].url;
           }
         }
-        Event.$emit("edit-images", { images: this.item.images });
-        this.item.images = [];
-        for (let key in res.data.documents) {
-          this.item.documents.push(res.data.documents[key]);
-        }
-        Event.$emit("edit-documents", { images: this.item.documents });
-        this.item.documents = [];
-      });
-    },
-    formatPriceIntoCurrency: function(id) {
-      this.item.price = parseInt(id).toFixed(2);
+       Event.$emit("edit-images", { images: this.item.images });
+       this.item.images = [];
+     });
     },
     updateItem() {
       this.$v.item.$touch();
@@ -474,12 +166,6 @@ export default {
         this.error.selectedImage = "";
       }
 
-      this.item.category_id = this.getId(this.categories, this.item.category);
-
-      this.item.brand_id = this.getId(this.brands, this.item.brand);
-      
-      this.item.model_id = this.getId(this.models, this.item.modelName);
-
       let form_data = new FormData();
       if (this.item.images) {
         for (var i = 0; i < this.item.images.length; i++) {
@@ -488,90 +174,32 @@ export default {
         }
       }
 
-      if (this.item.documents) {
-        for (var i = 0; i < this.item.documents.length; i++) {
-          let file = this.item.documents[i];
-          form_data.append("documents[" + i + "]", file);
-        }
-      }
-
-      form_data.append("id", this.productId);
+      form_data.append("id", this.itemId);
       form_data.append("name", this.item.name);
-      form_data.append("description", this.item.description);
-      form_data.append("quantity", this.item.quantity);
-      form_data.append("price", this.item.price);
-      form_data.append("condition", this.item.condition);
-      form_data.append("serial_number", this.item.serial_number);
-      form_data.append("stock_number", this.item.stock_number);
-      form_data.append("model_id", this.item.model_id);
-      form_data.append("category_id", this.item.category_id);
-      form_data.append("brand_id", this.item.brand_id);
-      form_data.append("year", this.item.year);
-      form_data.append("hours", this.item.hours);
-      form_data.append("location", this.item.location);
+      form_data.append("email", this.item.email);
+      form_data.append("phone", this.item.phone);
+      form_data.append("address", this.item.address);
+      form_data.append("zip", this.item.zip);
       form_data.append("primaryImage", this.item.selectedImage);
       form_data.append("primaryImageType", this.item.selectedImageType);
 
-      axios.post(api.updateProduct + this.productId, form_data).then(res => {
-        this.$noty.success("Product has been updated!", {
+      axios.post(api.updateItem, form_data).then(res => {
+        this.$noty.success("Item has been updated!", {
           closeWith: ["click", "button"]
         });
-        this.$router.push({ name: "index" });
-      });
-    },
-
-    getId(array, key) {
-      var result = null;
-      for (var i = 0; i < array.length; i++) {
-        if (array[i].name === key) {
-          result = array[i].id;
-          return result;
-        }
-      }
-    },
-    getCategory() {
-      axios.get(api.getCategory).then(res => {
-        const results = [];
-        for (let key in res.data) {
-          results.push(res.data[key]);
-        }
-        this.categories = results;
-      });
-    },
-    getModel() {
-      axios.get(api.getModel).then(res => {
-        const results = [];
-        for (let key in res.data) {
-          results.push(res.data[key]);
-        }
-        this.models = results;
-      });
-    },
-    getBrand() {
-      axios.get(api.getBrand).then(res => {
-        const results = [];
-        for (let key in res.data) {
-          results.push(res.data[key]);
-        }
-        this.brands = results;
+        this.$router.push({ name: "form" });
       });
     },
     setImage(images) {
       this.item.images.push(images.images);
-    },
-    setDocument(documents) {
-      this.item.documents.push(documents.documents);
     },
     resetImages() {
       this.item.images = [];
     }
   },
   created() {
-    this.productId = this.$route.params.id;
-    this.getProduct();
-    this.getCategory();
-    this.getBrand();
-    this.getModel();
+    this.itemId = this.$route.params.id;
+    this.getItem();
   },
   mounted() {
     Event.$on("reset-images", this.resetImages);
@@ -593,26 +221,6 @@ export default {
       }
       this.item.images.splice(id.id , 1);
     });
-
-    Event.$on("open-delete-modal", data => {
-       this.showModal= true;
-       this.id = data.id;
-       this.data = data;
-       this.errorModalTitle = '';
-       this.modalTitle = "are you sure you want to delete this " + data.label + ' : ' +  data.name + ' ?';
-       this.hideBtn = true;
-    });
-
-    Event.$on("confirm-modal", status => {
-        this.deleteData(this.data);
-    });
-
-    Event.$on("cancel-modal", action => {
-        this.hideModal();
-    });
-  },
-  beforeDestroy(){
-     Event.$off('confirm-modal')
   }
 };
 </script>
@@ -657,5 +265,11 @@ input[type="number"] {
 }
 .error-color {
   color: red;
+}
+
+.btn--primary{
+  display: block;
+  float: right;
+  margin-bottom: 10px;
 }
 </style>
